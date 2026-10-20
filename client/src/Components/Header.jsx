@@ -1,8 +1,12 @@
 import React from 'react'
 import {FaSearch} from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+
+const DEFAULT_AVATAR_URL = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_640.png';
 
 export default function Header() {
+    const {currentUser} = useSelector(state => state.user)
   return (
     <header className='bg-slate-200 shadow-md'>
 
@@ -27,11 +31,29 @@ export default function Header() {
             <Link to='/About'>
              <li className='hidden sm:inline text-slate-700 hover:underline'>About</li>
             </Link>
-           
-            <Link to='/SignIn'>
-            <li className=' text-slate-700 hover:underline'>SignIn</li>
-            </Link>
+
+
+             <Link to='/profile'>
+             {currentUser ? ( 
+               
+                <img
+                    className='rounded-full h-7 w-7 object-cover'
+                    src={currentUser.avatar || DEFAULT_AVATAR_URL}
+                    onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = DEFAULT_AVATAR_URL;
+                    }}
+                    alt='profile'
+                />
+
+                ): <li className=' text-slate-700 hover:underline'>SignIn</li>
+                    
+                }
+
+           </Link>
             
+           
+
             </ul> 
         </div>
         
