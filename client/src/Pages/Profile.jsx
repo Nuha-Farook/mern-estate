@@ -2,7 +2,17 @@ import { useSelector } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { app } from '../firebase';
-import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice';
+import { 
+  updateUserStart, 
+  updateUserSuccess, 
+  updateUserFailure, 
+  deleteUserFailure, 
+  deleteUserStart, 
+  deleteUserSuccess,
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure
+} from '../redux/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -91,7 +101,21 @@ export default function Profile() {
       dispatch(deleteUserFailure(error.message));
     }
   };
-
+  const handleSignOut = async () => {
+    try {
+      dispatch(signOutUserStart());
+      const res = await fetch('/api/auth/signout');
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
+      dispatch(signOutUserSuccess(data));
+      navigate('/sign-in');
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
+    }
+  };
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
@@ -124,7 +148,7 @@ export default function Profile() {
         <input
           type='text'
           placeholder='username'
-          defaultValue={currentUser.username}
+          defaultValue={currentUser?.username}
           id='username'
           className='border p-3 rounded-lg'
           onChange={handleChange}
@@ -133,7 +157,7 @@ export default function Profile() {
           type='email'
           placeholder='email'
           id='email'
-          defaultValue={currentUser.email}
+          defaultValue={currentUser?.email}
           className='border p-3 rounded-lg'
           onChange={handleChange}
         />
@@ -154,7 +178,7 @@ export default function Profile() {
 
       <div className='flex justify-between mt-5'>
         <span onClick={handleDeleteUser} className='text-red-700 cursor-pointer'>Delete account</span>
-        <span className='text-red-700 cursor-pointer'>Sign out</span>
+        <span onClick={handleSignOut} className='text-red-700 cursor-pointer'>Sign out</span>
       </div>
 
       <p className='text-red-700 mt-5'>{error ? error : ''}</p>
