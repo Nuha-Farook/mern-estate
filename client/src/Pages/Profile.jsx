@@ -1,7 +1,5 @@
 import { useSelector } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { app } from '../firebase';
 import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserStart } from '../redux/user/userSlice';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,28 +15,30 @@ export default function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleFileUpload = (fileToUpload) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + fileToUpload.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
+  const handleFileUpload = async (fileToUpload) => {
+    try {
+      setFileUploadError(false);
+      setFilePerc(20);
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', fileToUpload);
 
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setFilePerc(Math.round(progress));
-      },
-      (error) => {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
         setFileUploadError(true);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
-          setFormData((prev) => ({ ...prev, avatar: downloadURL }))
-        );
+        return;
       }
-    );
+
+      setFilePerc(100);
+      setFormData((prev) => ({ ...prev, avatar: data.url || data.urls[0] }));
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      setFileUploadError(true);
+    }
   };
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function Profile() {
         />
         <p className='text-sm self-center'>
           {fileUploadError ? (
-            <span className='text-red-700'>Error Image upload (image must be less than 2 mb)</span>
+            <span className='text-red-700'>Error uploading image</span>
           ) : filePerc > 0 && filePerc < 100 ? (
             <span className='text-slate-700'>{`Uploading ${filePerc}%`}</span>
           ) : filePerc === 100 ? (
