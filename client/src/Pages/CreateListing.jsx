@@ -166,7 +166,7 @@ export default function CreateListing() {
   return (
     <main className='p-3 max-w-4xl mx-auto'> 
         <h1 className='text-3xl font-semibold text-center my-7'>Create a Listing</h1>
-        <form onSubmit={handleSubmit} className='flex flex-col  gap-6'>
+        <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-4'>
             <div className="flex flex-col gap-4 flex-1"> 
                 <input type="text" placeholder="Name" className='border p-3 rounded-lg' id='name' maxLength='62' minLength='10' required onChange={handleChange} value={formData.name} />
                 <textarea type="text" placeholder="Description" className='border p-3 rounded-lg' id='description'  required onChange={handleChange} value={formData.description} />
@@ -256,12 +256,9 @@ export default function CreateListing() {
                    ))
                 }
 
+                <button disabled={loading || uploading} type='submit' className='p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>{loading ? 'Creating...' : 'Create Listing'}</button>
+                {error && <p className='text-red-700 text-sm'>{error}</p>}
             </div>
-             
-            <button disabled={loading || uploading}type='submit' className='p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80'>{loading ? 'Creating...' : 'Create Listing'}</button>
-            {error && <p className='text-red-700 text-sm'>{error}</p>}
-
-            
         </form>
     </main>
   )
