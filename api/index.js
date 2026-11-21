@@ -42,6 +42,13 @@ if (!mongoUri) {
   app.use("/api/auth", authRouter);
   app.use('/api/listing', listingRouter);
   app.use('/api/upload', uploadRouter);
+
+  app.use(express.static(path.join(path.resolve(), '/client/dist')));
+
+  app.get('{*splat}', (req, res) => {
+    res.sendFile(path.join(path.resolve(), 'client', 'dist', 'index.html'));
+  });
+
   app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Internet Server Error';
